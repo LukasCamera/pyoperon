@@ -202,7 +202,9 @@ void InitEval(py::module_ &m)
         .def_property_readonly("JacobianEvaluations", [](TEvaluatorBase& self) { return self.JacobianEvaluations.load(); });
 
     py::class_<TEvaluator, TEvaluatorBase>(m, "Evaluator")
-        .def(py::init<Operon::Problem&, TDispatch const&, Operon::ErrorMetric const&, bool>());
+        .def(py::init<Operon::Problem&, TDispatch const&, Operon::ErrorMetric const&, bool>())
+        .def_property("Weights", &TGaussEvaluator::Weights , &TGaussEvaluator::SetWeights /*set*/);
+
 
     py::class_<Operon::UserDefinedEvaluator, TEvaluatorBase>(m, "UserDefinedEvaluator")
         .def(py::init<Operon::Problem&, std::function<typename TEvaluatorBase::ReturnType(Operon::RandomGenerator*, Operon::Individual&)> const&>())

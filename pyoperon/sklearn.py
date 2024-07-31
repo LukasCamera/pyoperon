@@ -70,6 +70,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         add_model_scale_term           = True,
         add_model_intercept_term       = True,
         uncertainty                    = [1],
+        error_weights                  = [1],
         n_threads                      = 1,
         time_limit                     = None,
         random_state                   = None
@@ -117,6 +118,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.add_model_scale_term      = add_model_scale_term
         self.add_model_intercept_term  = add_model_intercept_term
         self.uncertainty               = uncertainty
+        self.error_weights             = error_weights
         self.time_limit                = time_limit
         self.random_state              = random_state
 
@@ -164,6 +166,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.add_model_scale_term           = check(self.add_model_scale_term, True)
         self.add_model_intercept_term       = check(self.add_model_intercept_term, True)
         self.uncertainty                    = check(self.uncertainty, [1])
+        self.error_weights                  = check(self.error_weights, [1])
         self.n_threads                      = check(self.n_threads, 1)
         self.time_limit                     = check(self.time_limit, sys.maxsize)
         self.random_state                   = check(self.random_state, random.getrandbits(64))
@@ -247,22 +250,34 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
 
     def __init_evaluator(self, objective, problem, dtable):
         if objective == 'r2':
-            return op.Evaluator(problem, dtable, op.R2(), True)
+            evaluator = op.Evaluator(problem, dtable, op.R2(), True)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'c2':
-            return op.Evaluator(problem, dtable, op.C2(), False)
+            evaluator = op.Evaluator(problem, dtable, op.C2(), False)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'nmse':
-            return op.Evaluator(problem, dtable, op.NMSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.NMSE(), True)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'rmse':
-            return op.Evaluator(problem, dtable, op.RMSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.RMSE(), True)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'mse':
-            return op.Evaluator(problem, dtable, op.MSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.MSE(), True)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'mae':
-            return op.Evaluator(problem, dtable, op.MAE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.MAE(), True)
+            evaluator.Weights = self.error_weights
+            return evaluator
 
         elif objective == 'length':
             return op.LengthEvaluator(problem)
