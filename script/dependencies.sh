@@ -275,9 +275,9 @@ rm -rf libassert
 
 ## operon
 [ -d operon ] && rm -rf operon
-git clone https://github.com/heal-research/operon.git
+git clone https://github.com/LukasCamera/operon.git
 pushd operon
-git checkout 4a93f98af108dbb98eb1cc10efe0f057b723293c
+git checkout error-weights
 mkdir build
 cmake -S . -B build --preset build-${PLATFORM} \
     -DCMAKE_BUILD_TYPE=Release \
