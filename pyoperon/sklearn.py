@@ -250,7 +250,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
 
     def __init_evaluator(self, objective, problem, dtable):
         if objective == 'r2':
-            evaluator = op.Evaluator(problem, dtable, op.R2(), True)
+            evaluator = op.Evaluator(problem, dtable, op.R2(), self.add_model_scale_term and self.add_model_intercept_term)
             evaluator.Weights = self.error_weights
             return evaluator
 
@@ -260,17 +260,17 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             return evaluator
 
         elif objective == 'nmse':
-            evaluator = op.Evaluator(problem, dtable, op.NMSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.NMSE(), self.add_model_scale_term and self.add_model_intercept_term)
             evaluator.Weights = self.error_weights
             return evaluator
 
         elif objective == 'rmse':
-            evaluator = op.Evaluator(problem, dtable, op.RMSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.RMSE(), self.add_model_scale_term and self.add_model_intercept_term)
             evaluator.Weights = self.error_weights
             return evaluator
 
         elif objective == 'mse':
-            evaluator = op.Evaluator(problem, dtable, op.MSE(), True)
+            evaluator = op.Evaluator(problem, dtable, op.MSE(), self.add_model_scale_term and self.add_model_intercept_term)
             evaluator.Weights = self.error_weights
             return evaluator
 
