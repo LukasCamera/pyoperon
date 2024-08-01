@@ -73,7 +73,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         error_weights                  = [1],
         n_threads                      = 1,
         time_limit                     = None,
-        random_state                   = None
+        random_state                   = None,
+        callback                       = None
         ):
 
         self.allowed_symbols           = allowed_symbols
@@ -121,6 +122,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.error_weights             = error_weights
         self.time_limit                = time_limit
         self.random_state              = random_state
+        self.callback                  = callback
 
 
     def __check_parameters(self):
@@ -170,6 +172,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.n_threads                      = check(self.n_threads, 1)
         self.time_limit                     = check(self.time_limit, sys.maxsize)
         self.random_state                   = check(self.random_state, random.getrandbits(64))
+        self.callback                       = check(self.callback, None)
 
 
     def __init_primitive_config(self, allowed_symbols):
@@ -541,7 +544,12 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
                  else op.NSGA2Algorithm(problem, config, tree_initializer, coeff_initializer, generator, reinserter, sorter)
         rng    = op.RomuTrio(np.uint64(config.Seed))
 
-        gp.Run(rng, None, self.n_threads)
+        if self.callback:
+            callback = lambda: self.callback(gp.Generation, gp.BestModel.GetFitness(0), op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
+        else:
+            callback = None
+
+        gp.Run(rng, callback, self.n_threads)
 
         def get_solution_stats(solution):
             """Takes a solution (operon individual) and computes a set of stats"""
