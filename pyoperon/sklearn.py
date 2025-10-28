@@ -631,3 +631,35 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         """
         check_is_fitted(self)
         return self.evaluate_model(self.model_, X)
+    
+
+    @staticmethod
+    def parse_expression(expr_str: str, ds: op.Dataset) -> op.Tree:
+        mapping = dict(zip(ds.VariableNames, ds.VariableHashes))
+
+        tree = op.InfixParser.Parse(expr_str, mapping)
+
+        new_nodes = []
+        i = tree.Length - 1
+        while i >= 0:
+            node = tree.Nodes[i]
+
+            children = list(tree.Children(i))
+
+            if (node.Type == op.NodeType.Mul 
+                and node.Arity == 2 
+                and any(child.Type == op.NodeType.Constant for child in children)
+                and any(child.Type == op.NodeType.Variable for child in children)
+            ):
+                if children[0].Type == op.NodeType.Variable:
+                    variable, constant = children
+                else:
+                    constant, variable = children
+
+                variable.Value = constant.Value
+                new_nodes.append(variable)
+                i -= 3
+            else:
+                new_nodes.append(node)
+                i -= 1
+        return op.Tree(new_nodes[::-1])
