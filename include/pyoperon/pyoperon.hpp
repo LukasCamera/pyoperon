@@ -6,6 +6,7 @@
 #include <nanobind/stl/vector.h>
 #include <nanobind/stl/unique_ptr.h>
 #include <nanobind/stl/function.h>
+#include <nanobind/stl/string.h>
 
 #include <type_traits>
 
