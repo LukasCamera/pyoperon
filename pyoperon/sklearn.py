@@ -644,10 +644,9 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         while i >= 0:
             node = tree.Nodes[i]
 
-            children = list(tree.Children(i))
-
             if (node.Type == op.NodeType.Mul 
                 and node.Arity == 2 
+                and (children := list(tree.Children(i)))
                 and any(child.Type == op.NodeType.Constant for child in children)
                 and any(child.Type == op.NodeType.Variable for child in children)
             ):
@@ -662,4 +661,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             else:
                 new_nodes.append(node)
                 i -= 1
-        return op.Tree(new_nodes[::-1])
+
+        tree_new = op.Tree(new_nodes[::-1])
+        tree_new.UpdateNodes()
+
+        return tree_new
