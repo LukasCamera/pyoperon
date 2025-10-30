@@ -75,6 +75,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         max_time                       = None,
         random_state                   = None,
         warm_start                     = False,
+        callback                       = None
         ):
 
         self.allowed_symbols           = allowed_symbols
@@ -123,6 +124,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.max_time                  = max_time
         self.random_state              = random_state
         self.warm_start                = warm_start
+        self.callback                  = callback
 
 
     def __check_parameters(self):
@@ -173,6 +175,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.max_time                       = check(self.max_time, sys.maxsize)
         self.random_state                   = check(self.random_state, random.getrandbits(64))
         self.warm_start                     = check(self.warm_start, False)
+        self.callback                       = check(self.callback, None)
 
 
     def __init_primitive_config(self, allowed_symbols):
@@ -557,7 +560,12 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
 
         rng    = op.RandomGenerator(np.uint64(config.Seed))
 
-        gp.Run(rng, None, self.n_threads, self.warm_start)
+        if self.callback:
+            callback = lambda: self.callback(gp.Generation, gp.BestModel.GetFitness(0), op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
+        else:
+            callback = None
+
+        gp.Run(rng, callback, self.n_threads, self.warm_start)
 
         def get_solution_stats(solution):
             """Takes a solution (operon individual) and computes a set of stats"""
