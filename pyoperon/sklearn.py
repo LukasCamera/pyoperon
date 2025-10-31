@@ -75,7 +75,9 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         max_time                       = None,
         random_state                   = None,
         warm_start                     = False,
-        callback                       = None
+        callback                       = None,
+        initial_population             = None,
+        variable_names                 = None,
         ):
 
         self.allowed_symbols           = allowed_symbols
@@ -125,6 +127,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.random_state              = random_state
         self.warm_start                = warm_start
         self.callback                  = callback
+        self.initial_population        = initial_population
+        self.variable_names            = variable_names
 
 
     def __check_parameters(self):
@@ -176,6 +180,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         self.random_state                   = check(self.random_state, random.getrandbits(64))
         self.warm_start                     = check(self.warm_start, False)
         self.callback                       = check(self.callback, None)
+        self.initial_population             = check(self.initial_population, None)
+        self.variable_names                 = check(self.variable_names, None)
 
 
     def __init_primitive_config(self, allowed_symbols):
@@ -450,6 +456,11 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         D                     = np.asfortranarray(np.column_stack((X, y)))
         ds                    = op.Dataset(D)
 
+        if self.variable_names:
+            if len(self.variable_names) != ds.Cols - 1:
+                raise ValueError('The length of variable_names must match the number of features in X')
+            ds.VariableNames = self.variable_names + ["y"]
+
         target                = max(ds.Variables, key=lambda x: x.Index) # last column is the target
         self.variables_       = { v.Hash : v.Name for v in sorted(ds.Variables, key=lambda x: x.Index) if v.Hash != target.Hash }
         self.inputs_          = [ k for k in self.variables_ ]
@@ -557,6 +568,19 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         if self.warm_start and hasattr(self, "is_fitted_") and self.is_fitted_:
             gp.RestoreIndividuals(self.individuals_)
             gp.IsFitted = True
+
+        if self.initial_population and self.variable_names:
+            self.warm_start = True
+            gp.IsFitted = True
+
+            pop = []
+            for individual_str in self.initial_population:
+                tree = SymbolicRegressor.parse_expression(individual_str, ds)
+                ind = op.Individual()
+                ind.Genotype = tree
+                pop.append(ind)
+
+            gp.RestoreIndividuals(pop)
 
         rng    = op.RandomGenerator(np.uint64(config.Seed))
 
