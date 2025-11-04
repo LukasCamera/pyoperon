@@ -580,6 +580,12 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
                 ind.Genotype = tree
                 pop.append(ind)
 
+                try:
+                    for i in range(tree.Length):
+                        pset.IsEnabled(tree.Nodes[i].HashValue)
+                except RuntimeError:
+                    raise ValueError(f'Symbol {tree.Nodes[i].Type} found in initial_population is not in the allowed_symbols set.')
+                
             gp.RestoreIndividuals(pop)
 
         rng    = op.RandomGenerator(np.uint64(config.Seed))
