@@ -651,6 +651,12 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
     def evaluate_model(self, model, X):
         X = check_array(X, accept_sparse=False)
         ds = op.Dataset(X)
+
+        if self.variable_names:
+            if len(self.variable_names) != ds.Cols:
+                raise ValueError('The length of variable_names must match the number of features in X')
+            ds.VariableNames = self.variable_names
+        
         rg = op.Range(0, ds.Rows)
         return op.Evaluate(model, ds, rg).reshape(-1,)
 
