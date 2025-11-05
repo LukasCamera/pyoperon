@@ -592,7 +592,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         rng    = op.RandomGenerator(np.uint64(config.Seed))
 
         if self.callback:
-            callback = lambda: self.callback(gp.Generation, gp.BestModel.GetFitness(0), op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
+            callback = lambda: self.callback(gp.Generation, gp.BestModel.GetFitness(0), gp.BestModel.Genotype.Length, op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
         else:
             callback = None
 
@@ -611,7 +611,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             solution.Genotype = op.Tree(nodes).UpdateNodes()
 
             stats = {
-                'model' : op.InfixFormatter.Format(solution.Genotype, self.variables_, 6),
+                'model' : op.InfixFormatter.Format(solution.Genotype, self.variables_, 30),
                 'variables' : set(self.variables_[x.HashValue] for x in nodes if x.IsVariable),
                 'length' : len(nodes),
                 'complexity' : len(nodes) + sum(1 for x in nodes if x.IsVariable),
