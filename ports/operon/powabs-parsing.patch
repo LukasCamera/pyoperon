@@ -1,0 +1,15 @@
+diff --git a/source/parser/infix.cpp b/source/parser/infix.cpp
+index 959051c..48c7819 100644
+--- a/source/parser/infix.cpp
++++ b/source/parser/infix.cpp
+@@ -106,8 +106,8 @@ namespace detail {
+             { "-", Token(TokenKind::dynamic, "sub", static_cast<size_t>(NodeType::Sub), 10, pratt::associativity::left) },
+             { "*", Token(TokenKind::dynamic, "mul", static_cast<size_t>(NodeType::Mul), 20, pratt::associativity::left) },
+             { "/", Token(TokenKind::dynamic, "div", static_cast<size_t>(NodeType::Div), 20, pratt::associativity::left) },
+-            { "^", Token(TokenKind::dynamic, "pow", static_cast<size_t>(NodeType::Pow), 30, pratt::associativity::right) },
+-            { "pow", Token(TokenKind::dynamic, "pow", static_cast<size_t>(NodeType::Pow), 30, pratt::associativity::right) },
++            { "^", Token(TokenKind::dynamic, "powabs", static_cast<size_t>(NodeType::Powabs), 30, pratt::associativity::right) },
++            { "pow", Token(TokenKind::dynamic, "powabs", static_cast<size_t>(NodeType::Powabs), 30, pratt::associativity::right) },
+             { "powabs", Token(TokenKind::dynamic, "powabs", static_cast<size_t>(NodeType::Powabs), 30, pratt::associativity::right) },
+             { "min", Token(TokenKind::dynamic, "min", static_cast<size_t>(NodeType::Fmin), 30, pratt::associativity::left) },
+             { "max", Token(TokenKind::dynamic, "max", static_cast<size_t>(NodeType::Fmax), 30, pratt::associativity::left) },
