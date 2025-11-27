@@ -1,0 +1,53 @@
+diff --git a/include/operon/core/node.hpp b/include/operon/core/node.hpp
+index e7afeda..414f1ca 100644
+--- a/include/operon/core/node.hpp
++++ b/include/operon/core/node.hpp
+@@ -128,7 +128,7 @@ struct Node {
+         }
+         Length = Arity;
+         IsEnabled = true;
+-        Optimize = IsLeaf(); // we only optimize leaf nodes
++        Optimize = IsLeaf() & !IsVariable(); // we only optimize leaf nodes
+         Value = 1.;
+     }
+ 
+diff --git a/include/operon/operators/initializer.hpp b/include/operon/operators/initializer.hpp
+index d3f1618..3fc4bbf 100644
+--- a/include/operon/operators/initializer.hpp
++++ b/include/operon/operators/initializer.hpp
+@@ -28,7 +28,7 @@ struct OPERON_EXPORT CoefficientInitializer : public CoefficientInitializerBase
+     }
+ 
+     CoefficientInitializer()
+-        : CoefficientInitializer([](auto const& node) { return node.IsLeaf(); })
++        : CoefficientInitializer([](auto const& node) { return node.IsLeaf() && !node.IsVariable(); })
+     {
+     }
+ 
+diff --git a/include/operon/operators/mutation.hpp b/include/operon/operators/mutation.hpp
+index 305c7f2..d36955d 100644
+--- a/include/operon/operators/mutation.hpp
++++ b/include/operon/operators/mutation.hpp
+@@ -34,9 +34,10 @@ struct OPERON_EXPORT OnePointMutation : public MutatorBase {
+     {
+         auto& nodes = tree.Nodes();
+         // sample a random leaf
+-        auto it = Operon::Random::Sample(random, nodes.begin(), nodes.end(), [](auto const& n) { return n.IsLeaf(); });
+-        EXPECT(it < nodes.end());
+-        it->Value += Dist(params_)(random);
++        auto it = Operon::Random::Sample(random, nodes.begin(), nodes.end(), [](auto const& n) { return n.IsLeaf() && !n.IsVariable(); });
++        if (it != nodes.end()) {
++            it->Value += Dist(params_)(random);
++        }
+ 
+         return tree;
+     }
+@@ -56,7 +57,7 @@ struct OPERON_EXPORT MultiPointMutation : public MutatorBase {
+     auto operator()(Operon::RandomGenerator& random, Tree tree) const -> Tree override
+     {
+         for (auto& node : tree.Nodes()) {
+-            if (node.IsLeaf()) {
++            if (node.IsLeaf() && !node.IsVariable()) {
+                 node.Value += Dist(params_)(random);
+             }
+         }

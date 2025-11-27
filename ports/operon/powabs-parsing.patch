@@ -1,5 +1,5 @@
 diff --git a/source/parser/infix.cpp b/source/parser/infix.cpp
-index 959051c..48c7819 100644
+index 959051c..48c7847 100644
 --- a/source/parser/infix.cpp
 +++ b/source/parser/infix.cpp
 @@ -106,8 +106,8 @@ namespace detail {

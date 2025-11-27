@@ -7,6 +7,7 @@ vcpkg_from_github(
     PATCHES
         add-msvc-support.patch
         powabs-parsing.patch
+        disable-variable-scaling.patch
 )
 
 include("${VCPKG_ROOT_DIR}/ports/vcpkg-cmake/vcpkg_cmake_build.cmake")
