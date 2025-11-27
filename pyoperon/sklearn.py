@@ -265,42 +265,42 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
 
     def __init_evaluator(self, objective, problem, dtable):
         if objective == 'r2':
-            if not self.add_model_scale_term or not self.add_model_intercept_term:
-                warnings.warn('R2 evaluator requires model scaling and intercept terms to be added; overriding settings.')
-                self.add_model_scale_term    = True
-                self.add_model_intercept_term = True
-            return op.Evaluator(problem, dtable, op.R2(), True)
+            #if not self.add_model_scale_term or not self.add_model_intercept_term:
+            #    warnings.warn('R2 evaluator requires model scaling and intercept terms to be added; overriding settings.')
+            #    self.add_model_scale_term    = True
+            #    self.add_model_intercept_term = True
+            return op.Evaluator(problem, dtable, op.R2(), self.add_model_scale_term and self.add_model_intercept_term)
 
         elif objective == 'c2':
             return op.Evaluator(problem, dtable, op.C2(), False)
 
         elif objective == 'nmse':
-            if not self.add_model_scale_term or not self.add_model_intercept_term:
-                warnings.warn('NMSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
-                self.add_model_scale_term    = True
-                self.add_model_intercept_term = True
-            return op.Evaluator(problem, dtable, op.NMSE(), True)
+            #if not self.add_model_scale_term or not self.add_model_intercept_term:
+            #    warnings.warn('NMSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
+            #    self.add_model_scale_term    = True
+            #    self.add_model_intercept_term = True
+            return op.Evaluator(problem, dtable, op.NMSE(), self.add_model_scale_term and self.add_model_intercept_term)
 
         elif objective == 'rmse':
-            if not self.add_model_scale_term or not self.add_model_intercept_term:
-                warnings.warn('RMSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
-                self.add_model_scale_term    = True
-                self.add_model_intercept_term = True
-            return op.Evaluator(problem, dtable, op.RMSE(), True)
+            #if not self.add_model_scale_term or not self.add_model_intercept_term:
+            #    warnings.warn('RMSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
+            #    self.add_model_scale_term    = True
+            #    self.add_model_intercept_term = True
+            return op.Evaluator(problem, dtable, op.RMSE(), self.add_model_scale_term and self.add_model_intercept_term)
 
         elif objective == 'mse':
-            if not self.add_model_scale_term or not self.add_model_intercept_term:
-                warnings.warn('MSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
-                self.add_model_scale_term    = True
-                self.add_model_intercept_term = True
-            return op.Evaluator(problem, dtable, op.MSE(), True)
+            #if not self.add_model_scale_term or not self.add_model_intercept_term:
+            #    warnings.warn('MSE evaluator requires model scaling and intercept terms to be added; overriding settings.')
+            #    self.add_model_scale_term    = True
+            #    self.add_model_intercept_term = True
+            return op.Evaluator(problem, dtable, op.MSE(), self.add_model_scale_term and self.add_model_intercept_term)
 
         elif objective == 'mae':
-            if not self.add_model_scale_term or not self.add_model_intercept_term:
-                warnings.warn('MAE evaluator requires model scaling and intercept terms to be added; overriding settings.')
-                self.add_model_scale_term    = True
-                self.add_model_intercept_term = True
-            return op.Evaluator(problem, dtable, op.MAE(), True)
+            #if not self.add_model_scale_term or not self.add_model_intercept_term:
+            #    warnings.warn('MAE evaluator requires model scaling and intercept terms to be added; overriding settings.')
+            #    self.add_model_scale_term    = True
+            #    self.add_model_intercept_term = True
+            return op.Evaluator(problem, dtable, op.MAE(), self.add_model_scale_term and self.add_model_intercept_term)
 
         elif objective == 'length':
             return op.LengthEvaluator(problem)
