@@ -712,32 +712,4 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
     def parse_expression(expr_str: str, ds: op.Dataset) -> op.Tree:
         mapping = dict(zip(ds.VariableNames, ds.VariableHashes))
 
-        tree = op.InfixParser.Parse(expr_str, mapping)
-
-        new_nodes = []
-        i = tree.Length - 1
-        while i >= 0:
-            node = tree.Nodes[i]
-
-            if (node.Type == op.NodeType.Mul 
-                and node.Arity == 2 
-                and (children := list(tree.Children(i)))
-                and any(child.Type == op.NodeType.Constant for child in children)
-                and any(child.Type == op.NodeType.Variable for child in children)
-            ):
-                if children[0].Type == op.NodeType.Variable:
-                    variable, constant = children
-                else:
-                    constant, variable = children
-
-                variable.Value = constant.Value
-                new_nodes.append(variable)
-                i -= 3
-            else:
-                new_nodes.append(node)
-                i -= 1
-
-        tree_new = op.Tree(new_nodes[::-1])
-        tree_new.UpdateNodes()
-
-        return tree_new
+        return op.InfixParser.Parse(expr_str, mapping)

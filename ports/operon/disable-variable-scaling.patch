@@ -51,3 +51,18 @@ index 305c7f2..d36955d 100644
                  node.Value += Dist(params_)(random);
              }
          }
+diff --git a/source/operators/mutation.cpp b/source/operators/mutation.cpp
+index fea8c6c..1728fcf 100644
+--- a/source/operators/mutation.cpp
++++ b/source/operators/mutation.cpp
+@@ -18,8 +18,8 @@ namespace Operon {
+ auto DiscretePointMutation::operator()(Operon::RandomGenerator& random, Tree tree) const -> Tree
+ {
+     auto& nodes = tree.Nodes();
+-    auto it = Operon::Random::Sample(random, nodes.begin(), nodes.end(), [](auto const& n) { return n.IsLeaf(); });
+-    ENSURE(it < nodes.end());
++    auto it = Operon::Random::Sample(random, nodes.begin(), nodes.end(), [](auto const& n) { return n.IsLeaf() && !n.IsVariable(); });
++    if(it == nodes.end()) return tree;
+ 
+     auto s = std::reduce(weights_.cbegin(), weights_.cend(), Operon::Scalar { 0 }, std::plus {});
+     auto r = std::uniform_real_distribution<Operon::Scalar>(0., s)(random);
