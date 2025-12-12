@@ -197,7 +197,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             'fmax' : op.NodeType.Fmax,
             'aq' : op.NodeType.Aq,
             'pow' : op.NodeType.Pow,
-            'powabs': op.NodeType.Powabs,
+            'powabs' : op.NodeType.Powabs,
             'abs' : op.NodeType.Abs,
             'acos' : op.NodeType.Acos,
             'asin' : op.NodeType.Asin,
@@ -627,6 +627,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             """Takes a solution (operon individual) and computes a set of stats"""
             # perform linear scaling
             y_pred = op.Evaluate(dtable, solution.Genotype, ds, training_range)
+            y_pred[np.isinf(y_pred) | np.isnan(y_pred)] = np.finfo(y_pred.dtype).max
+
             scale, offset = op.FitLeastSquares(y_pred, y)
             nodes = solution.Genotype.Nodes
             
@@ -672,6 +674,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         }
 
         self.individuals_ = [x for x in gp.Individuals]
+        self.population_ = [get_solution_stats(x) for x in gp.Individuals[:self.population_size]]
 
         self.is_fitted_ = True
         # `fit` should always return `self`
