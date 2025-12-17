@@ -657,6 +657,22 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
 
             return stats
 
+        diversity_analyzer = op.PopulationDiversityAnalyzer()
+
+        self.diversity_per_length_ = {}
+        self.count_per_length_ = {}
+
+        for curr_len in range(3, self.max_length+1):
+            individuals_size_n = [x.Genotype for x in gp.Individuals[:self.population_size] if x.Genotype.Length == curr_len]
+            
+            count = len(individuals_size_n)
+            self.count_per_length_[curr_len] = count
+            
+            if count > 1:
+                diversity_analyzer.Prepare(individuals_size_n)
+                self.diversity_per_length_[curr_len] = diversity_analyzer(rng)
+            else:
+                self.diversity_per_length_[curr_len] = 0.0
 
         front = [gp.BestModel] if single_objective else gp.BestFront
         self.pareto_front_ = [get_solution_stats(m) for m in front]

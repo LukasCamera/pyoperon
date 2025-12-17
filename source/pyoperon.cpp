@@ -8,6 +8,7 @@
 #include <operon/formatter/formatter.hpp>
 #include <operon/parser/infix.hpp>
 #include <operon/random/random.hpp>
+#include <operon/analyzers/diversity.hpp>
 
 #include <nanobind/stl/bind_vector.h>
 #include <nanobind/stl/string.h>
@@ -147,6 +148,18 @@ NB_MODULE(pyoperon, m)
             Operon::Map<std::string, Operon::Hash> map(variables.begin(), variables.end());
             return Operon::InfixParser::Parse(expr, map);
         });
+
+    using PopulationDiversityAnalyzer = Operon::PopulationDiversityAnalyzer<Operon::Tree, Operon::HashMode::Relaxed>;
+    nb::class_<PopulationDiversityAnalyzer>(m, "PopulationDiversityAnalyzer")
+        .def(nb::init<>())
+        .def("__call__", [](PopulationDiversityAnalyzer& self, Operon::RandomGenerator& random) {
+                return self(random);
+            })
+        .def("Prepare", 
+            [](PopulationDiversityAnalyzer& self, std::vector<Operon::Tree> trees) {
+                self.Prepare(Operon::Span<Operon::Tree>(trees.data(), trees.size()));
+            }, nb::arg("population")
+        );
 
     // genetic algorithm
     nb::class_<Operon::GeneticAlgorithmConfig>(m, "GeneticAlgorithmConfig")
