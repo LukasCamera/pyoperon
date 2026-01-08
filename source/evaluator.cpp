@@ -32,48 +32,6 @@ template<typename T>
 auto PoissonLikelihood(nb::ndarray<T> x, nb::ndarray<T> y, nb::ndarray<T> w) {
     return TPoissonLikelihood::ComputeLikelihood(MakeSpan(x), MakeSpan(y), MakeSpan(w));
 }
-
-// small wrapper to unify the differently-templated MDL evaluators under a single class
-class MDLEvaluator {
-    std::unique_ptr<TEvaluatorBase> eval_;
-    enum { Gauss, Poisson, PoissonLog } lik_ = Gauss; // TODO: very ugly, find something better
-
-public:
-    MDLEvaluator(Operon::Problem const& problem, TDispatch const& dtable, std::string const& lik) {
-        if (lik == "gauss") {
-            eval_ = std::make_unique<TMDLEvaluatorGauss>(&problem, &dtable);
-            lik_ = Gauss;
-        } else if (lik == "poisson") {
-            eval_ = std::make_unique<TMDLEvaluatorPoisson>(&problem, &dtable);
-            lik_ = Poisson;
-        } else if (lik == "poisson_log") {
-            eval_ = std::make_unique<TMDLEvaluatorPoissonLog>(&problem, &dtable);
-            lik_ = PoissonLog;
-        } else {
-            throw std::runtime_error(fmt::format("unknown likelihood: {}", lik));
-        }
-    }
-
-    auto SetSigma(std::vector<Operon::Scalar> const& sigma) -> void {
-        switch(lik_) {
-            case Gauss: dynamic_cast<TMDLEvaluatorGauss*>(eval_.get())->SetSigma(sigma); break;
-            case Poisson: dynamic_cast<TMDLEvaluatorPoisson*>(eval_.get())->SetSigma(sigma); break;
-            case PoissonLog: dynamic_cast<TMDLEvaluatorPoissonLog*>(eval_.get())->SetSigma(sigma); break;
-            default: throw std::runtime_error("unknown likelihood");
-        }
-    }
-
-    auto GetSigma() -> std::span<Operon::Scalar const> {
-        switch(lik_) {
-            case Gauss: return dynamic_cast<TMDLEvaluatorGauss*>(eval_.get())->Sigma();
-            case Poisson: return dynamic_cast<TMDLEvaluatorPoisson*>(eval_.get())->Sigma();
-            case PoissonLog: return dynamic_cast<TMDLEvaluatorPoissonLog*>(eval_.get())->Sigma();
-            default: throw std::runtime_error("unknown likelihood");
-        }
-    }
-
-    [[nodiscard]] auto Get() const { return eval_.get(); }
-};
 } // namespace detail
 
 void InitEval(nb::module_ &m)
@@ -240,13 +198,6 @@ void InitEval(nb::module_ &m)
         .def(nb::init<TEvaluatorBase const*>())
         .def_prop_rw("AggregateType", &Operon::AggregateEvaluator::GetAggregateType, &Operon::AggregateEvaluator::SetAggregateType);
 
-    nb::class_<detail::MDLEvaluator>(m, "MinimumDescriptionLengthEvaluator")
-        .def(nb::init<Operon::Problem const&, TDispatch const&, std::string const&>())
-        .def("__call__", [](detail::MDLEvaluator const& self, Operon::RandomGenerator& rng, Operon::Individual const& ind) {
-            return (*self.Get())(rng, ind);
-        })
-        .def_prop_rw("Sigma", nullptr /*get*/ , &detail::MDLEvaluator::SetSigma /*set*/);
-
     nb::class_<TBICEvaluator, TEvaluator>(m, "BayesianInformationCriterionEvaluator")
         .def(nb::init<Operon::Problem const*, TDispatch const*>());
 
@@ -263,4 +214,8 @@ void InitEval(nb::module_ &m)
             auto sigma = self.Sigma();
             return std::vector<Operon::Scalar>(sigma.begin(), sigma.end());
         }, &TPoissonEvaluator::SetSigma /*set*/);
+
+    nb::class_<TMDLEvaluatorGauss, TEvaluator>(m, "MinimumDescriptionLengthEvaluator")
+        .def(nb::init<Operon::Problem const*, TDispatch const*>())
+        .def_prop_rw("Sigma", &TMDLEvaluatorGauss::Sigma , &TMDLEvaluatorGauss::SetSigma /*set*/);;
 }

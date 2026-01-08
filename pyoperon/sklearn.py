@@ -312,8 +312,8 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
             return op.DiversityEvaluator(problem)
 
         elif objective == 'mdl':
-            if self.uncertainty == [1]: # default uncertainty
-                warnings.warn('It seems you have not set uncertainty (or have set it to [1]). MDL requires an estimate for the noise standard deviation. Your results will be unreliable.')
+            # if self.uncertainty == [1]: # default uncertainty
+            #     warnings.warn('It seems you have not set uncertainty (or have set it to [1]). MDL requires an estimate for the noise standard deviation. Your results will be unreliable.')
             evaluator = op.MinimumDescriptionLengthEvaluator(problem, dtable)
             evaluator.Sigma = self.uncertainty
             return evaluator
@@ -521,7 +521,7 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         optimizer = self.__init_optimizer(dtable, problem, self.optimizer, self.optimizer_likelihood, self.optimizer_iterations, self.optimizer_batch_size, update_rule)
 
         # evaluators for minimum description length and information criteria
-        mdl_eval = op.MinimumDescriptionLengthEvaluator(problem, dtable, 'gauss')
+        mdl_eval = op.MinimumDescriptionLengthEvaluator(problem, dtable)
         mdl_eval.Sigma = self.uncertainty
 
         bic_eval = op.BayesianInformationCriterionEvaluator(problem, dtable)
@@ -617,7 +617,11 @@ class SymbolicRegressor(BaseEstimator, RegressorMixin):
         rng    = op.RandomGenerator(np.uint64(config.Seed))
 
         if self.callback:
-            callback = lambda: self.callback(gp.Generation, gp.BestModel.GetFitness(0), gp.BestModel.Genotype.Length, op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
+            def callback():
+                try:
+                    self.callback(gp.Generation, gp.BestModel.GetFitness(0), gp.BestModel.Genotype.Length, op.InfixFormatter.Format(gp.BestModel.Genotype, self.variables_, 30))
+                except Exception as e:
+                    print(f"Error during callback model evaluation: {e}") 
         else:
             callback = None
 
